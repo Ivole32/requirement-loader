@@ -1,2 +1,2 @@
 # requirements-loader
-Automatically fetch and install Python dependencies from a remote server.
+When working on production servers, there is a risk that a zero-day vulnerability may be discovered in one of the packages listed in the requirements.txt file. With Requirement Loader, you can update the requirements file hosted online (e.g., on GitHub), and it will automatically download and install the updated dependencies. It can then either restart the application immediately or, if the update is too complex, defer the update until the next scheduled restart.
