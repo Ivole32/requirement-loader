@@ -29,10 +29,10 @@ def install_requirements() -> None:
         sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
     ], check=True)
 
-def main() -> None:
-    load_requirements("https://github.com/Ivole32/gambling-simulator/blob/main/requirements.txt")
-    #load_requirements("file:///home/ivo/GitHub/requirement-loader/requirements.txt")
-    install_requirements()
-
 if __name__ == "__main__":
+    def main() -> None:
+        load_requirements("https://github.com/Ivole32/gambling-simulator/blob/main/requirements.txt")
+        load_requirements("file:///home/ivo/GitHub/requirement-loader/requirements.txt")
+        install_requirements()
+        
     main()

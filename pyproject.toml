@@ -6,8 +6,5 @@ authors = [{ name = "Ivole32", email = "ivo.theis@posteo.de" }]
 readme = "README.md"
 requires-python = ">=3.11"
 
-[project.scripts]
-requirement-loader = "requirement_loader.__main__:main"
-
 [tool.setuptools.packages.find]
 where = ["."]
