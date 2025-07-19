@@ -1,3 +1,3 @@
-from .requirement_loader import load_requirements, install_requirements
+from .requirement_loader import RequirementLoader
 
-__all__ = ["load_requirements", "install_requirements"]
+__all__ = ["RequirementLoader"]
