@@ -1,17 +1,26 @@
 import subprocess
 import threading
 import requests
+import time
 import sys
 
 class RequirementLoader():
-    def __init__(self):
-        program = threading.Thread(target=self.start())
+    def __init__(self, silent_mode: bool = True) -> None:
+        self.silent_mode = silent_mode
+
+        program = threading.Thread(target=self.start, kwargs={'silent_mode': self.silent_mode})
+        program.daemon = True
         program.start()
 
-    def start(self) -> None:
+        while program.is_alive():
+            time.sleep(1)
+
+        exit(0)
+
+    def start(self, silent_mode: bool = True) -> None:
         while True:
             self.load_requirements("file:///home/ivo/GitHub/requirement-loader/requirements.txt")
-            self.install_requirements()
+            self.install_requirements(silent_mode)
 
     def convert_to_raw_url(self, github_url: str) -> str:
         if "raw.githubusercontent.com" in github_url:
@@ -35,10 +44,19 @@ class RequirementLoader():
         with open("requirements.txt", "w") as requirements:
             requirements.write(content)
 
-    def install_requirements(self) -> None:
-        result = subprocess.run([
-            sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
-        ], check=True)
+    def install_requirements(self, silent: bool = True) -> None:
+        if silent:
+            result = subprocess.run([
+                sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        else:
+            result = subprocess.run([
+                sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+            ], check=True)
+
+    def reload_program(self) -> None:
+        pass
 
 if __name__ == "__main__":
     """def main() -> None:
@@ -46,6 +64,6 @@ if __name__ == "__main__":
         load_requirements("file:///home/ivo/GitHub/requirement-loader/requirements.txt")
         install_requirements()"""
     def main() -> None:
-        loader = RequirementLoader()
+        loader = RequirementLoader(silent_mode=False)
         
     main() 
