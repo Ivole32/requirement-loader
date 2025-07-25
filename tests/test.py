@@ -2,9 +2,8 @@ from requirement_loader import RequirementLoader
 from importlib.metadata import version
 import time
 
-loader = RequirementLoader(update_at_startup=True, sleep_time=3, silent_mode=False, auto_reload=False)
-#loader.update()
-#loader.start_update_thread()
+requirement_url = "file:///home/ivo/GitHub/requirement-loader/testing/requirements.txt"
+loader = RequirementLoader(requirement_url=requirement_url, update_at_startup=True, sleep_time=3, silent_mode=False, auto_reload=False)
 
 i = 0
 while True:

@@ -13,13 +13,14 @@ class ArgumentConflict(Exception):
     pass
 
 class RequirementLoader():
-    def __init__(self, update_at_startup: bool = True, silent_mode: bool = True, sleep_time: int = 5, auto_reload: bool = True) -> None:
+    def __init__(self, requirement_url: str = "requirements.txt", update_at_startup: bool = True, silent_mode: bool = True, sleep_time: int = 5, auto_reload: bool = True) -> None:
         self.silent_mode = silent_mode
         self.sleep_time = sleep_time
         self.auto_reload = auto_reload
         self.update_at_startup = update_at_startup
         self.first_update_made = False
         self.new_version = False
+        self.requirement_url = requirement_url
 
         if update_at_startup:
             self.update(reload=True, manual_update=False)
@@ -46,7 +47,7 @@ class RequirementLoader():
                 forced_update = True
                 self.first_update_made = True
 
-            self.load_requirements("file:///home/ivo/GitHub/requirement-loader/testing/requirements.txt", force_update=forced_update)
+            self.load_requirements(self.requirement_url, force_update=forced_update)
             self.install_requirements(self.silent_mode, reload=reload, forced_update=forced_update)
         except Exception as e:
             print(f"{e}")
@@ -60,7 +61,7 @@ class RequirementLoader():
     def update_thread(self, silent_mode: bool = True, sleep_time: int = 5) -> None:
         while True:
             try:
-                self.load_requirements("file:///home/ivo/GitHub/requirement-loader/testing/requirements.txt")
+                self.load_requirements(self.requirement_url)
                 self.install_requirements(silent_mode)
             except Exception as e:
                 print(f"{e}")
@@ -117,7 +118,8 @@ class RequirementLoader():
             else:
                 print(f"reload={str(reload)}")
             self.first_update_made = True
-            if self.auto_reload and not (reload != None and reload == False):
+
+            if self.auto_reload or not (reload != None and reload == False):
                 self._reload_program(reloaded=forced_update)
 
     def _reload_program(self, reloaded: bool = True) -> None:     
