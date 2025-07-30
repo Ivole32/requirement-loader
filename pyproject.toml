@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "requirement-loader"
 version = "0.0.1"
@@ -5,6 +9,8 @@ description = "When working on production servers, there is a risk that a zero-d
 authors = [{ name = "Ivole32", email = "ivo.theis@posteo.de" }]
 readme = "README.md"
 requires-python = ">=3.11"
+dependencies = ["requests"]
 
 [tool.setuptools.packages.find]
 where = ["."]
+include = ["requirement_loader*"]

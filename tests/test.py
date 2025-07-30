@@ -7,12 +7,17 @@ loader = RequirementLoader(requirement_url=requirement_url, update_at_startup=Tr
 
 i = 0
 while True:
-    i += 1
-    print("Test")
-    
-    print(version("flask"))
+    try:
+        i += 1
+        print("Test")
+        
+        print(version("fastapi"))
 
-    if i == 4:
-        loader.update(reload=False)
+        if i == 4:
+            loader.update(reload=False)
 
-    time.sleep(3)
+        time.sleep(3)
+    except KeyboardInterrupt:
+        break
+
+exit(0)

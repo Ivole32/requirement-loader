@@ -5,3 +5,4 @@ dist
 venv
 requirement_loader.egg-info
 requirements.txt
+class.drawio
