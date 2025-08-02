@@ -13,7 +13,7 @@ class ArgumentConflict(Exception):
     pass
 
 class RequirementLoader():
-    def __init__(self, requirement_url: str = "requirements.txt", update_at_startup: bool = True, silent_mode: bool = True, sleep_time: int = 5, auto_reload: bool = True) -> None:
+    def __init__(self, requirement_url: str = "requirements.txt", update_at_startup: bool = True, silent_mode: bool = True, sleep_time: int = 300, auto_reload: bool = True) -> None:
         self.silent_mode = silent_mode
         self.sleep_time = sleep_time
         self.auto_reload = auto_reload
