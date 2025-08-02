@@ -43,12 +43,12 @@ class RequirementLoader():
             if "reloaded=True" in args:
                 forced_update = False
 
-            if manual_update and self.first_update_made:
+            if manual_update:
                 forced_update = True
                 self.first_update_made = True
 
             self.load_requirements(self.requirement_url, force_update=forced_update)
-            self.install_requirements(self.silent_mode, reload=reload, forced_update=forced_update)
+            self.install_requirements(silent=self.silent_mode, reload=reload, forced_update=forced_update)
         except Exception as e:
             print(f"{e}")
 
@@ -101,7 +101,7 @@ class RequirementLoader():
             self.new_version = False
 
     def install_requirements(self, silent: bool = True, forced_update: bool = False, reload: bool = None) -> None:
-        if self.new_version:
+        if self.new_version or forced_update:
             if silent:
                 result = subprocess.run([
                     sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
@@ -133,4 +133,4 @@ if __name__ == "__main__":
     def main() -> None:
         loader = RequirementLoader(silent_mode=False)
         
-    main() 
+    main()
