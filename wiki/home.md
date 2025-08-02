@@ -44,7 +44,7 @@ manual_loader = RequirementLoader(
 )
 
 # Trigger manual updates when needed
-manual_loader.update(reload=True, manual_update=True)
+manual_loader.update(reload=True)
 ```
 
 ## 📝 Version Information

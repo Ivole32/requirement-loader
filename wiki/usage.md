@@ -71,13 +71,20 @@ loader.update(reload=False)  # Update without restarting
 The `update()` method provides manual control over dependency updates:
 
 ```python
-loader.update(reload=True, manual_update=True)
+loader.update(reload=True)   # Update and restart
+loader.update(reload=False)  # Update without restart
+
+# With custom session for authentication
+import requests
+session = requests.Session()
+session.headers.update({'Authorization': 'Bearer token'})
+loader.update(reload=False, request_session=session)
 ```
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `reload` | `bool` | `False` | Whether to restart the application after update |
-| `manual_update` | `bool` | `True` | Must be `True` for manual calls when `auto_reload=False` |
+| `request_session` | `requests.Session` | `None` | Custom session for authentication/proxies (optional) |
 
 **Usage Examples:**
 ```python
@@ -87,7 +94,16 @@ loader.update(reload=False)
 # Update and restart application
 loader.update(reload=True)
 
-# Manual updates are forced to update even if nothing changed (for now).
+# Update with authentication
+import requests
+auth_session = requests.Session()
+auth_session.auth = ('username', 'password')
+loader.update(reload=False, request_session=auth_session)
+
+# Update with proxy
+proxy_session = requests.Session()
+proxy_session.proxies = {'https': 'proxy.company.com:8080'}
+loader.update(reload=True, request_session=proxy_session)
 ```
 
 ### Example with Custom Configuration
@@ -100,6 +116,51 @@ loader = RequirementLoader(
     sleep_time=30,               # Check every 30 seconds
     auto_reload=True             # Enable background updates
 )
+```
+
+### Authentication Examples
+
+```python
+import requests
+from requirement_loader import RequirementLoader
+
+# Basic loader setup for private resources
+loader = RequirementLoader(
+    requirement_url="https://private-server.com/requirements.txt",
+    auto_reload=False  # Use manual updates for authentication
+)
+
+# GitHub Personal Access Token
+github_session = requests.Session()
+github_session.headers.update({
+    'Authorization': 'token ghp_your_github_token',
+    'Accept': 'application/vnd.github.v3.raw'
+})
+loader.update(reload=False, request_session=github_session)
+
+# Basic Authentication
+basic_session = requests.Session()
+basic_session.auth = ('username', 'password')
+loader.update(reload=False, request_session=basic_session)
+
+# API Key Authentication
+api_session = requests.Session()
+api_session.headers.update({'X-API-Key': 'your-api-key'})
+loader.update(reload=False, request_session=api_session)
+
+# Proxy with Authentication
+proxy_session = requests.Session()
+proxy_session.proxies = {
+    'http': 'http://user:pass@proxy.company.com:8080',
+    'https': 'https://user:pass@proxy.company.com:8080'
+}
+loader.update(reload=False, request_session=proxy_session)
+
+# SSL Certificate Configuration
+ssl_session = requests.Session()
+ssl_session.verify = '/path/to/ca-bundle.crt'
+ssl_session.cert = ('/path/to/client.cert', '/path/to/client.key')
+loader.update(reload=False, request_session=ssl_session)
 ```
 
 ## 🌐 URL Types
@@ -227,7 +288,7 @@ class CustomRequirementLoader:
             try:
                 print("Checking for updates...")
                 # Use manual update for precise control
-                self.loader.load_requirements()
+                self.loader.update(reload=False)
                 
                 # Custom logic here - e.g., send notifications, log updates
                 if self.loader.new_version:
@@ -309,27 +370,41 @@ multi_loader = MultiSourceLoader()
 
 ## 🚨 Error Handling
 
+### Exception Types
+
+Requirement Loader defines two specific exception types:
+
+#### ArgumentConflict
+Raised when there's a conflict between automatic and manual update modes:
+- **When it occurs**: Trying to call `update()` when `auto_reload=True`
+- **Solution**: Set `auto_reload=False` for manual control
+
+#### RestrictedArgumentError  
+Raised when trying to access internal-only functionality:
+- **When it occurs**: Attempting to use undocumented internal parameters
+- **Solution**: Use only the public API methods
+
 ### Understanding Exceptions
 
 Requirement Loader has specific error handling for manual updates:
 
 ```python
-from requirement_loader import RequirementLoader, RestrictedArgumentError, ArgumentConflict
+from requirement_loader import RequirementLoader, ArgumentConflict, RestrictedArgumentError
 
 try:
     # Correct setup for manual updates
     loader = RequirementLoader(auto_reload=False)  # Disable auto updates
     
     # This will work
-    loader.update(reload=True, manual_update=True)
+    loader.update(reload=True)
     
 except ArgumentConflict as e:
     print(f"Configuration conflict: {e}")
-    # This happens when trying manual_update=True with auto_reload=True
+    # This happens when trying to manually update with auto_reload=True
     
 except RestrictedArgumentError as e:
-    print(f"Invalid argument usage: {e}")
-    # This happens when manual_update=False is used incorrectly
+    print(f"Restricted argument usage: {e}")
+    # This happens when trying to access internal-only parameters
     
 except Exception as e:
     print(f"Unexpected error: {e}")
@@ -338,18 +413,22 @@ except Exception as e:
 try:
     # This will raise ArgumentConflict
     auto_loader = RequirementLoader(auto_reload=True)
-    auto_loader.update(manual_update=True)  # ERROR: Can't mix auto and manual
+    auto_loader.update()  # ERROR: Can't manually update when auto_reload=True
     
 except ArgumentConflict as e:
     print("Cannot manually update when auto_reload is enabled!")
 
+# RestrictedArgumentError example:
+# This error occurs when trying to use internal-only parameters
+# The public API doesn't expose these, but it's good to know about this error
 try:
-    # This will raise RestrictedArgumentError  
     loader = RequirementLoader(auto_reload=False)
-    loader.update(manual_update=False)  # ERROR: manual_update=False is internal only
+    # The following would cause RestrictedArgumentError if attempted:
+    # loader.update(reload=True, manual_update=False)  # Internal parameter only
+    print("Using public API only - no issues!")
     
 except RestrictedArgumentError as e:
-    print("manual_update=False is for internal use only!")
+    print("Attempted to use internal-only functionality!")
 ```
 
 ### Robust Error Handling

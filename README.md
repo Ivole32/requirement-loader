@@ -97,6 +97,35 @@ loader = RequirementLoader(
 )
 ```
 
+### Authentication & Private Repositories
+Access private requirements files using custom sessions in manual updates:
+
+```python
+import requests
+from requirement_loader import RequirementLoader
+
+# Setup loader for private repository (will fail without auth)
+loader = RequirementLoader(
+    requirement_url="https://github.com/private-org/private-repo/blob/main/requirements.txt",
+    auto_reload=False  # Use manual updates for authentication
+)
+
+# Create authenticated session
+session = requests.Session()
+session.headers.update({
+    'Authorization': 'token ghp_your_github_token',
+    'Accept': 'application/vnd.github.v3.raw'
+})
+
+# Update with authentication
+loader.update(reload=True, request_session=session)
+
+# Different auth methods for different updates
+basic_auth_session = requests.Session()
+basic_auth_session.auth = ('username', 'password')
+loader.update(reload=False, request_session=basic_auth_session)
+```
+
 ### Manual Updates
 For scenarios where you need full control over when updates occur, disable automatic updates and trigger them manually:
 
@@ -113,9 +142,18 @@ loader = RequirementLoader(
 # Manually trigger updates when needed
 loader.update(reload=True)   # Update and restart application
 loader.update(reload=False)  # Update without restarting
+
+# Custom authentication for specific updates
+import requests
+auth_session = requests.Session()
+auth_session.headers.update({'Authorization': 'Bearer your-token'})
+auth_session.proxies = {'https': 'proxy.company.com:8080'}
+
+# Use custom session for this specific update
+loader.update(reload=False, request_session=auth_session)
 ```
 
-**Note**: The `manual_update=True` parameter is only available when `auto_reload=False`. This prevents conflicts between automatic and manual update processes.
+**Note**: When `auto_reload=False`, you have full control over when updates occur and whether to restart the application.
 
 ## 🔧 Supported URL Types
 
@@ -142,19 +180,32 @@ loader.update(reload=False)  # Update without restarting
 ### Manual Update Method
 
 ```python
-loader.update(reload=True, manual_update=True)
+loader.update(reload=True)   # Update and restart
+loader.update(reload=False)  # Update without restart
+
+# With custom session for authentication
+import requests
+session = requests.Session()
+session.auth = ('username', 'password')
+loader.update(reload=False, request_session=session)
 ```
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `reload` | `bool` | `False` | Whether to restart the application after update |
-| `manual_update` | `bool` | `True` | Must be `True` for manual calls (internal parameter) |
+| `request_session` | `requests.Session` | `None` | Custom session for authentication/proxies (optional) |
 
-**Important**: `manual_update=True` can only be used when `auto_reload=False` to prevent conflicts.
+**Important**: Manual updates are only possible when `auto_reload=False` to prevent conflicts with automatic updates.
 
 ## 🚨 Error Handling
 
-Requirement Loader includes comprehensive error handling for manual updates:
+Requirement Loader defines specific exception types for different error scenarios:
+
+### Exception Types
+- **`ArgumentConflict`**: Raised when trying to manually update while `auto_reload=True`
+- **`RestrictedArgumentError`**: Raised when attempting to use internal-only parameters
+
+### Error Handling Examples
 
 ```python
 from requirement_loader import RequirementLoader, ArgumentConflict, RestrictedArgumentError
@@ -167,15 +218,15 @@ try:
     )
     
     # Manual update - this works
-    loader.update(reload=True, manual_update=True)
+    loader.update(reload=True)
     
 except ArgumentConflict as e:
     print(f"Configuration conflict: {e}")
     # This happens when trying manual updates with auto_reload=True
     
 except RestrictedArgumentError as e:
-    print(f"Invalid argument: {e}")
-    # This happens when manual_update=False is used incorrectly
+    print(f"Restricted argument usage: {e}")
+    # This happens when trying to use internal-only parameters
     
 except Exception as e:
     print(f"Unexpected error: {e}")
@@ -183,10 +234,19 @@ except Exception as e:
 # Example of what causes ArgumentConflict:
 try:
     loader_auto = RequirementLoader(auto_reload=True)
-    loader_auto.update(manual_update=True)  # This will raise ArgumentConflict
+    loader_auto.update()  # This will raise ArgumentConflict when auto_reload=True
 except ArgumentConflict as e:
     print("Can't manually update when auto_reload is enabled!")
-```
+
+# Example of what causes RestrictedArgumentError:
+# Note: This would only happen if you try to access internal parameters
+# The public API (loader.update(reload=True/False)) doesn't expose these
+try:
+    loader = RequirementLoader(auto_reload=False)
+    # Don't try to use undocumented parameters - they're internal only
+    # loader.update(reload=True, manual_update=False)  # This would cause RestrictedArgumentError
+except RestrictedArgumentError as e:
+    print("Attempted to use internal-only parameter!")
 ```
 
 ## 🐳 Docker Example
@@ -197,12 +257,7 @@ FROM python:3.11-slim
 # Install requirement-loader
 RUN pip install requirement-loader
 
-# Copy your application
-COPY . /app
-WORKDIR /app
-
-# Your app will automatically manage its dependencies
-CMD ["python", "app.py"]
+# You can use it in your code now
 ```
 
 ## 🔒 Security Considerations
@@ -252,9 +307,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install in development mode
 pip install -e .
-
-# Install development dependencies
-pip install pytest black flake8
 ```
 
 ## 📋 Requirements
@@ -264,7 +316,7 @@ pip install pytest black flake8
 
 ## 📝 Changelog
 
-### v0.0.3 (Current)
+### v0.0.4 (Current)
 - Initial stable release
 - Support for GitHub, HTTPS, HTTP, and local file URLs
 - Automatic application restart functionality

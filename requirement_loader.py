@@ -28,7 +28,7 @@ class RequirementLoader():
         if self.auto_reload:
             self.start_update_thread()
 
-    def update(self, reload: bool = False, manual_update: bool = True) -> None:
+    def update(self, reload: bool = False, manual_update: bool = True, request_session = requests.Session()) -> None:
         args = sys.argv
         caller_file = os.path.basename(inspect.stack()[1].filename)
         
@@ -47,7 +47,7 @@ class RequirementLoader():
                 forced_update = True
                 self.first_update_made = True
 
-            self.load_requirements(self.requirement_url, force_update=forced_update)
+            self.load_requirements(self.requirement_url, force_update=forced_update, session=request_session)
             self.install_requirements(silent=self.silent_mode, reload=reload, forced_update=forced_update)
         except Exception as e:
             print(f"{e}")
@@ -77,14 +77,14 @@ class RequirementLoader():
         
         return url
 
-    def load_requirements(self, url: str, force_update: bool = False) -> None:
+    def load_requirements(self, url: str, force_update: bool = False, session = requests.Session()) -> None:
         if url.startswith("file://"):
             file_path = url[7:]
             with open(file_path, "r") as source_file:
                 content = source_file.read()
         elif url.startswith(("http://", "https://")):
             url = self._convert_to_raw_url(url)
-            response = requests.get(url)
+            response = session.get(url)
             content = response.text
 
         try:

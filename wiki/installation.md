@@ -200,7 +200,7 @@ print("✅ Requirement Loader is working correctly!")
 # Test manual update functionality
 print("Testing manual update...")
 try:
-    loader.update(reload=False, manual_update=True)
+    loader.update(reload=False)
     print("✅ Manual update functionality works!")
 except Exception as e:
     print(f"❌ Manual update failed: {e}")
@@ -221,7 +221,7 @@ try:
         requirement_url="file://test_requirements.txt",
         auto_reload=False
     )
-    manual_loader.update(reload=False, manual_update=True)
+    manual_loader.update(reload=False)
     print("✅ Manual update mode works correctly")
 except Exception as e:
     print(f"❌ Manual update failed: {e}")
@@ -229,12 +229,21 @@ except Exception as e:
 # Test 2: Conflict detection (should raise ArgumentConflict)
 try:
     auto_loader = RequirementLoader(auto_reload=True)
-    auto_loader.update(manual_update=True)  # This should fail
+    auto_loader.update()  # This should fail
     print("❌ Error: Conflict detection not working")
 except ArgumentConflict:
     print("✅ Conflict detection works correctly")
+except Exception as e:
+    print(f"❌ Unexpected error: {e}")
+
+# Test 3: Exception handling test
+try:
+    from requirement_loader import RestrictedArgumentError
+    print("✅ All exception types available")
+except ImportError as e:
+    print(f"❌ Exception import failed: {e}")
 ```
 
 ## 🎯 Next Steps
 
-Once installation is complete, proceed to the [Usage Guide](usage.md) to learn how to use Requirement Loader in your applications.
+Once installation is complete, proceed to the [Usage Guide](usage) to learn how to use Requirement Loader in your applications.

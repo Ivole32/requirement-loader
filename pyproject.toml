@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "requirement-loader"
-version = "0.0.3"
+version = "0.0.4"
 description = "Automatically fetch and install Python dependencies from a remote server."
 authors = [{ name = "Ivole32", email = "ivo.theis@posteo.de" }]
 readme = "README.md"
