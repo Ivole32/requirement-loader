@@ -4,13 +4,13 @@ This comprehensive guide covers all aspects of using Requirement Loader in your 
 
 ## 📚 Table of Contents
 
-1. [Basic Usage](#basic-usage)
-2. [Configuration Options](#configuration-options)
-3. [URL Types](#url-types)
-4. [Advanced Usage](#advanced-usage)
-5. [Error Handling](#error-handling)
-6. [Best Practices](#best-practices)
-7. [Examples](#examples)
+1. [Basic Usage](#-basic-usage)
+2. [Configuration Options](#-configuration-options)
+3. [URL Types](#-url-types)
+4. [Advanced Usage](#-advanced-usage)
+5. [Error Handling](#-Error-Handling)
+6. [Best Practices](#-best-practices)
+7. [Examples](#-examples)
 
 ## 🚀 Basic Usage
 
