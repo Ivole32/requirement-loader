@@ -22,8 +22,8 @@ Requirement Loader is a Python library that automatically fetches and installs P
 
 ## 📚 Documentation Structure
 
-- **[Installation](installation.md)** - How to install and set up Requirement Loader
-- **[Usage](usage.md)** - Complete usage guide with examples and best practices
+- **[Installation](installation)** - How to install and set up Requirement Loader
+- **[Usage](usage)** - Complete usage guide with examples and best practices
 
 ## 🔧 Quick Start
 
