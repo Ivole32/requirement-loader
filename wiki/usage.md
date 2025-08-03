@@ -21,7 +21,8 @@ from requirement_loader import RequirementLoader
 
 # Basic setup with GitHub URL
 loader = RequirementLoader(
-    requirement_url="https://github.com/user/repo/blob/main/requirements.txt"
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt",
+    requirement_temp_file="downloaded_requirements.txt"  # Custom temp file
 )
 ```
 
@@ -41,6 +42,7 @@ from requirement_loader import RequirementLoader
 # Disable automatic updates for manual control
 loader = RequirementLoader(
     requirement_url="https://github.com/user/repo/blob/main/requirements.txt",
+    requirement_temp_file="manual_requirements.txt",  # Custom temp file for manual updates
     update_at_startup=False,
     auto_reload=False
 )
@@ -61,6 +63,7 @@ loader.update(reload=False)  # Update without restarting
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `requirement_url` | `str` | `"requirements.txt"` | URL or path to requirements file |
+| `requirement_temp_file` | `str` | `"requirements_temp.txt"` | Local temporary file path for downloaded requirements |
 | `update_at_startup` | `bool` | `True` | Download and install requirements on initialization |
 | `silent_mode` | `bool` | `True` | Install packages without verbose output |
 | `sleep_time` | `int` | `300` | Seconds between update checks (when auto_reload=True) |
@@ -111,6 +114,7 @@ loader.update(reload=True, request_session=proxy_session)
 ```python
 loader = RequirementLoader(
     requirement_url="https://raw.githubusercontent.com/user/repo/main/requirements.txt",
+    requirement_temp_file="custom_temp_reqs.txt",  # Custom temporary file
     update_at_startup=True,      # Install on startup
     silent_mode=False,           # Show pip output
     sleep_time=30,               # Check every 30 seconds
@@ -199,7 +203,230 @@ loader = RequirementLoader("file:///path/to/local/requirements.txt")
 loader = RequirementLoader("file://./requirements.txt")
 ```
 
-## 🔥 Advanced Usage
+## � Temporary File Management
+
+Requirement Loader downloads requirements to a temporary file before installation. This provides better control over the update process and allows for validation before installation.
+
+### Default Temporary File
+
+By default, requirements are saved to `requirements_temp.txt`:
+
+```python
+# Uses default temp file 'requirements_temp.txt'
+loader = RequirementLoader(
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt"
+)
+```
+
+The temporary file will be created in your current working directory and will contain the downloaded requirements content.
+
+### Custom Temporary File Path
+
+You can specify a custom location for the temporary requirements file:
+
+```python
+# Custom temporary file location
+loader = RequirementLoader(
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt",
+    requirement_temp_file="./temp/project_requirements.txt"
+)
+```
+
+### Environment-Specific Temporary Files
+
+```python
+import os
+
+# Different temp files for different environments
+def get_temp_file_path():
+    env = os.environ.get('ENVIRONMENT', 'development')
+    
+    if env == 'production':
+        return "/var/app/temp/prod_requirements.txt"
+    elif env == 'staging':
+        return "/tmp/staging_requirements.txt"
+    else:
+        return "dev_requirements_temp.txt"
+
+loader = RequirementLoader(
+    requirement_url="https://github.com/company/project/blob/main/requirements.txt",
+    requirement_temp_file=get_temp_file_path(),
+    auto_reload=True
+)
+```
+
+### Temporary File in Secure Directory
+
+```python
+import os
+import tempfile
+
+# Create temporary file in system temp directory
+temp_dir = tempfile.gettempdir()
+temp_file = os.path.join(temp_dir, "secure_requirements.txt")
+
+loader = RequirementLoader(
+    requirement_url="https://private-repo.com/requirements.txt",
+    requirement_temp_file=temp_file
+)
+```
+
+### Advanced Temporary File Handling
+
+```python
+import os
+from pathlib import Path
+
+class SecureRequirementLoader:
+    def __init__(self, requirement_url, temp_dir="./temp"):
+        # Ensure temp directory exists
+        Path(temp_dir).mkdir(parents=True, exist_ok=True)
+        
+        # Set secure permissions (Unix-like systems)
+        if os.name != 'nt':  # Not Windows
+            os.chmod(temp_dir, 0o700)
+        
+        temp_file = os.path.join(temp_dir, "requirements_secure.txt")
+        
+        self.loader = RequirementLoader(
+            requirement_url=requirement_url,
+            requirement_temp_file=temp_file,
+            auto_reload=False
+        )
+    
+    def secure_update(self):
+        """Update with additional security checks"""
+        try:
+            # Perform update
+            self.loader.update(reload=False)
+            
+            # Validate temp file contents
+            if self._validate_requirements():
+                print("Requirements validated successfully")
+                self.loader.update(reload=True)
+            else:
+                print("Requirements validation failed")
+                
+        except Exception as e:
+            print(f"Secure update failed: {e}")
+    
+    def _validate_requirements(self):
+        """Validate requirements file content"""
+        try:
+            with open(self.loader.requirement_temp_file, 'r') as f:
+                content = f.read()
+                
+            # Basic validation - check for suspicious content
+            suspicious_patterns = ['rm -rf', 'sudo', 'curl', 'wget']
+            for pattern in suspicious_patterns:
+                if pattern in content.lower():
+                    return False
+                    
+            # Check if it looks like a valid requirements file
+            lines = content.strip().split('\n')
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    # Should contain package names or version specs
+                    if not any(c.isalnum() for c in line):
+                        return False
+                        
+            return True
+            
+        except Exception:
+            return False
+
+# Usage
+secure_loader = SecureRequirementLoader(
+    "https://github.com/trusted/repo/blob/main/requirements.txt"
+)
+secure_loader.secure_update()
+```
+
+### Temporary File Lifecycle
+
+1. **Download**: Requirements are fetched from the URL
+2. **Compare**: New content is compared with existing temp file
+3. **Write**: If different, new content overwrites the temp file
+4. **Install**: pip installs from the temp file
+5. **Persist**: Temp file remains for next comparison
+
+### Best Practices for Temporary Files
+
+```python
+import os
+import tempfile
+from pathlib import Path
+
+# 1. Use absolute paths to avoid confusion
+temp_file = os.path.abspath("./temp/requirements.txt")
+
+# 2. Ensure directory exists
+Path(temp_file).parent.mkdir(parents=True, exist_ok=True)
+
+# 3. Use platform-appropriate temp directories
+if os.name == 'nt':  # Windows
+    temp_file = os.path.join(os.environ['TEMP'], 'app_requirements.txt')
+else:  # Unix-like
+    temp_file = '/tmp/app_requirements.txt'
+
+# 4. Include project identifier in filename
+project_name = "myapp"
+temp_file = f"/tmp/{project_name}_requirements.txt"
+
+loader = RequirementLoader(
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt",
+    requirement_temp_file=temp_file
+)
+```
+
+### Troubleshooting Temporary Files
+
+```python
+import os
+from requirement_loader import RequirementLoader
+
+def debug_temp_file(loader):
+    """Debug temporary file issues"""
+    temp_file = loader.requirement_temp_file
+    
+    print(f"Temporary file path: {temp_file}")
+    print(f"Temp file exists: {os.path.exists(temp_file)}")
+    
+    if os.path.exists(temp_file):
+        print(f"File size: {os.path.getsize(temp_file)} bytes")
+        print(f"File readable: {os.access(temp_file, os.R_OK)}")
+        print(f"File writable: {os.access(temp_file, os.W_OK)}")
+        
+        # Show first few lines of temp file
+        try:
+            with open(temp_file, 'r') as f:
+                content = f.read()
+                lines = content.split('\n')[:5]
+                print("First 5 lines:")
+                for i, line in enumerate(lines, 1):
+                    print(f"  {i}: {line}")
+        except Exception as e:
+            print(f"Cannot read temp file: {e}")
+    
+    # Check directory permissions
+    temp_dir = os.path.dirname(temp_file)
+    print(f"Directory exists: {os.path.exists(temp_dir)}")
+    print(f"Directory writable: {os.access(temp_dir, os.W_OK)}")
+
+# Usage
+loader = RequirementLoader(
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt",
+    requirement_temp_file="./debug/requirements.txt",
+    auto_reload=False
+)
+
+debug_temp_file(loader)
+```
+
+The temporary file feature provides flexibility and control over where downloaded requirements are stored, enabling better integration with different deployment environments and security requirements.
+
+## �🔥 Advanced Usage
 
 ### Manual Update Strategies
 
@@ -500,9 +727,11 @@ REQUIREMENTS_URL = os.environ.get(
 )
 
 UPDATE_INTERVAL = int(os.environ.get('UPDATE_INTERVAL', 300))  # 5 minutes
+TEMP_FILE_PATH = os.environ.get('TEMP_FILE_PATH', 'prod_requirements_temp.txt')
 
 loader = RequirementLoader(
     requirement_url=REQUIREMENTS_URL,
+    requirement_temp_file=TEMP_FILE_PATH,  # Environment-configurable temp file
     update_at_startup=True,
     silent_mode=True,
     sleep_time=UPDATE_INTERVAL,

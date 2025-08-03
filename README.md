@@ -52,6 +52,7 @@ from requirement_loader import RequirementLoader
 # Production setup with custom configuration
 loader = RequirementLoader(
     requirement_url="https://your-server.com/secure/requirements.txt",
+    requirement_temp_file="secure_temp_reqs.txt",  # Custom temporary file
     update_at_startup=True,      # Install dependencies on startup
     silent_mode=True,            # Quiet installation(s)
     sleep_time=600,              # Check every 10 minutes
@@ -172,6 +173,7 @@ loader.update(reload=False, request_session=auth_session)
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `requirement_url` | `str` | `"requirements.txt"` | URL or path to requirements file |
+| `requirement_temp_file` | `str` | `"requirements_temp.txt"` | Local temporary file path for downloaded requirements |
 | `update_at_startup` | `bool` | `True` | Download and install requirements on initialization |
 | `silent_mode` | `bool` | `True` | Install packages without verbose output |
 | `sleep_time` | `int` | `5` | Seconds between update checks |
@@ -196,6 +198,74 @@ loader.update(reload=False, request_session=session)
 | `request_session` | `requests.Session` | `None` | Custom session for authentication/proxies (optional) |
 
 **Important**: Manual updates are only possible when `auto_reload=False` to prevent conflicts with automatic updates.
+
+## 📁 Temporary File Management
+
+Requirement Loader uses a temporary file to store downloaded requirements before installation. This allows for better control and error handling during the update process.
+
+### Default Behavior
+
+By default, downloaded requirements are saved to `requirements_temp.txt` in your current working directory:
+
+```python
+# Uses default temporary file 'requirements_temp.txt'
+loader = RequirementLoader(
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt"
+)
+```
+
+### Custom Temporary File Location
+
+You can specify a custom location for the temporary requirements file:
+
+```python
+# Custom temporary file location
+loader = RequirementLoader(
+    requirement_url="https://github.com/user/repo/blob/main/requirements.txt",
+    requirement_temp_file="./temp/my_requirements.txt"  # Custom path
+)
+```
+
+### Use Cases for Custom Temp Files
+
+```python
+# Different environments with separate temp files
+if os.environ.get('ENVIRONMENT') == 'production':
+    temp_file = "/var/tmp/prod_requirements.txt"
+elif os.environ.get('ENVIRONMENT') == 'staging':
+    temp_file = "/tmp/staging_requirements.txt"
+else:
+    temp_file = "dev_requirements_temp.txt"
+
+loader = RequirementLoader(
+    requirement_url="https://github.com/company/configs/blob/main/requirements.txt",
+    requirement_temp_file=temp_file
+)
+```
+
+### Security Considerations
+
+- **Temporary files** contain your requirements and should be treated securely
+- **File permissions** should be restricted to prevent unauthorized access
+- **Cleanup** - temp files are overwritten on each update but not automatically deleted
+- **Path traversal** - validate temp file paths to prevent directory traversal attacks
+
+```python
+import os
+
+# Secure temporary file handling
+def get_secure_temp_path(filename):
+    """Ensure temp file is in a secure location"""
+    temp_dir = "/secure/temp/path"
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir, mode=0o700)  # Restricted permissions
+    return os.path.join(temp_dir, filename)
+
+loader = RequirementLoader(
+    requirement_url="https://private-repo.com/requirements.txt",
+    requirement_temp_file=get_secure_temp_path("requirements.txt")
+)
+```
 
 ## 🚨 Error Handling
 

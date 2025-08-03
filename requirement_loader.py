@@ -13,7 +13,7 @@ class ArgumentConflict(Exception):
     pass
 
 class RequirementLoader():
-    def __init__(self, requirement_url: str = "requirements.txt", update_at_startup: bool = True, silent_mode: bool = True, sleep_time: int = 300, auto_reload: bool = True) -> None:
+    def __init__(self, requirement_url: str = "requirements.txt", requirement_temp_file: str = "requirements_temp.txt", update_at_startup: bool = True, silent_mode: bool = True, sleep_time: int = 300, auto_reload: bool = True) -> None:
         self.silent_mode = silent_mode
         self.sleep_time = sleep_time
         self.auto_reload = auto_reload
@@ -21,6 +21,7 @@ class RequirementLoader():
         self.first_update_made = False
         self.new_version = False
         self.requirement_url = requirement_url
+        self.requirement_temp_file = requirement_temp_file
 
         if update_at_startup:
             self.update(reload=True, manual_update=False)
@@ -88,13 +89,13 @@ class RequirementLoader():
             content = response.text
 
         try:
-            with open("requirements.txt", "r") as requirements:
+            with open(self.requirement_temp_file, "r") as requirements:
                 old_requirements = requirements.read()
         except:
             old_requirements = ""
 
         if old_requirements != content or force_update:
-            with open("requirements.txt", "w") as requirements:
+            with open(self.requirement_temp_file, "w") as requirements:
                 requirements.write(content)
             self.new_version = True
         else:
@@ -104,12 +105,12 @@ class RequirementLoader():
         if self.new_version or forced_update:
             if silent:
                 result = subprocess.run([
-                    sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+                    sys.executable, "-m", "pip", "install", "-r", self.requirement_temp_file
                 ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
             elif not silent:
                 result = subprocess.run([
-                    sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+                    sys.executable, "-m", "pip", "install", "-r", self.requirement_temp_file
                 ], check=True)
 
             print(f"pip returncode: {str(result.returncode)}")
