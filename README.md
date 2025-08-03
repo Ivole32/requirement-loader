@@ -1,7 +1,7 @@
 # 🚀 Requirement Loader
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
-[![PyPI Version](https://img.shields.io/badge/pypi-0.0.7-green.svg)](https://pypi.org/project/requirement-loader/)
+[![PyPI Version](https://img.shields.io/badge/pypi-1.0.0-green.svg)](https://pypi.org/project/requirement-loader/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/Ivole32/requirement-loader.svg)](https://github.com/Ivole32/requirement-loader/issues)
 
@@ -386,7 +386,7 @@ pip install -e .
 
 ## 📝 Changelog
 
-### v0.0.7 (Current)
+### v1.0.0 (Current)
 - Initial stable release
 - Support for GitHub, HTTPS, HTTP, and local file URLs
 - Automatic application restart functionality

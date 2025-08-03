@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "requirement-loader"
-version = "0.0.7"
+version = "1.0.0"
 description = "Automatically fetch and install Python dependencies from a remote server."
 authors = [{ name = "Ivole32", email = "ivo.theis@posteo.de" }]
 readme = "README.md"
@@ -14,7 +14,7 @@ dependencies = [
     "requests>=2.25.0",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",

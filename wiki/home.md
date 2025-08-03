@@ -49,7 +49,7 @@ manual_loader.update(reload=True)
 
 ## 📝 Version Information
 
-- **Current Version**: 0.0.7
+- **Current Version**: 1.0.0
 - **Python Compatibility**: 3.11+
 - **License**: MIT
 
