@@ -1,7 +1,7 @@
 # 🚀 Requirement Loader
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
-[![PyPI Version](https://img.shields.io/badge/pypi-0.0.3-green.svg)](https://pypi.org/project/requirement-loader/)
+[![PyPI Version](https://img.shields.io/badge/pypi-0.0.7-green.svg)](https://pypi.org/project/requirement-loader/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/Ivole32/requirement-loader.svg)](https://github.com/Ivole32/requirement-loader/issues)
 
@@ -61,11 +61,11 @@ loader = RequirementLoader(
 
 ## 📖 Documentation
 
-For comprehensive documentation, examples, and best practices, visit our [Wiki](wiki/home.md):
+For comprehensive documentation, examples, and best practices, visit our [Wiki](https://github.com/Ivole32/requirement-loader/wiki/home):
 
-- **[Installation Guide](wiki/installation.md)** - Detailed installation instructions and setup
-- **[Usage Guide](wiki/usage.md)** - Complete usage examples and configuration options
-- **[Home](wiki/home.md)** - Overview and getting started
+- **[Installation Guide](https://github.com/Ivole32/requirement-loader/wiki/installation)** - Detailed installation instructions and setup
+- **[Usage Guide](https://github.com/Ivole32/requirement-loader/wiki/usage)** - Complete usage examples and configuration options
+- **[Home](https://github.com/Ivole32/requirement-loader/wiki/home)** - Overview and getting started
 
 ## 🛡️ Use Cases
 
@@ -316,7 +316,7 @@ pip install -e .
 
 ## 📝 Changelog
 
-### v0.0.4 (Current)
+### v0.0.7 (Current)
 - Initial stable release
 - Support for GitHub, HTTPS, HTTP, and local file URLs
 - Automatic application restart functionality
@@ -331,7 +331,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/Ivole32/requirement-loader/issues)
 - **Email**: ivo.theis@posteo.de
-- **Documentation**: [Wiki](wiki/home.md)
+- **Documentation**: [Wiki](https://github.com/Ivole32/requirement-loader/wiki/home)
 
 ## 🙏 Acknowledgments
 

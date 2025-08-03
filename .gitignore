@@ -1,7 +1,6 @@
 __pycache__
 build
 testing
-dist
 venv
 requirement_loader.egg-info
 requirements.txt
